@@ -17,13 +17,24 @@ namespace ExchangeService.Handler
 {
     public class ExchangeRateHandler
     {
+        public string data;
+
+        public int firstCurrencyCode;
+
+        public int secondCurrencyCode;
+        
+        public List<Currency> getCalculateExchangeRates(int firstCurrencyCode, int secondCurrencyCode) {
+            var exchangeRates = new List<Currency>();
+            exchangeRates.Add(returnOshadBankCourses(firstCurrencyCode,secondCurrencyCode, "https://api.privatbank.ua", @"(\d{2}.\d{4})","ПриватБанк")); 
+            exchangeRates.Add(returnOshadBankCourses(firstCurrencyCode, secondCurrencyCode, @"https://kurs.com.ua/bank/88-oshchadbank/", @"<span class='ipsKurs_rate'>(\d{2}.\d{4})</span>", "Ощадбанк"));
+            exchangeRates.Add(returnOshadBankCourses(firstCurrencyCode, secondCurrencyCode, @"https://about.pumb.ua/ru/info/currency_converter", @"<td>(\d{2}.\d{2})</td>", "ПУМБ"));
+            return exchangeRates;
+        }
         public Currency calculateExchangeRate(string data, int firstCurrencyCode, int secondCurrencyCode, string pattern)
         {
             if (firstCurrencyCode == secondCurrencyCode)
             {
-                Currency eq = new Currency();
-                eq.buying = "1";
-                eq.selling = "1";
+                Currency eq = new Currency("1","1",null);
                 return eq;
             }
 
@@ -123,29 +134,25 @@ namespace ExchangeService.Handler
             }
             return cur;
         }
-        public Currency returnPrivatBankCourses(int firstCurrencyCode, int secondCurrencyCode, string bank) {
+        public Currency returnOshadBankCourses(int firstCurrencyCode, int secondCurrencyCode,string URL, string pattern, string bank) {
 
-            HttpClient client = new HttpClient();
-            client.BaseAddress = new Uri("https://api.privatbank.ua");
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            if (bank =="ПриватБанк") {
+                HttpClient client = new HttpClient();
+                client.BaseAddress = new Uri(URL);
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            var response = client.GetAsync("/p24api/pubinfo?json&exchange&coursid=5").Result;
-            string res = "";
+                var responseFromAsync = client.GetAsync("/p24api/pubinfo?json&exchange&coursid=5").Result;
+                string res = "";
 
-            HttpContent content = response.Content;
-            Task<string> result = content.ReadAsStringAsync();
+                HttpContent content = responseFromAsync.Content;
+                Task<string> result = content.ReadAsStringAsync();
 
-            res = result.Result;
-            Currency cur = new Currency();
-            cur = calculateExchangeRate(res, firstCurrencyCode, secondCurrencyCode, @"(\d{2}.\d{4})");
-            cur.bankName = bank;
-            return cur;
-        }
+                res = result.Result;
+                return finilizeCurrencyExchange(res, firstCurrencyCode, secondCurrencyCode, pattern, bank);
+            }
 
-        public Currency returnOshadBankCourses(int firstCurrencyCode, int secondCurrencyCode, string bank)
-        {
             WebRequest request;
-            request = WebRequest.Create(@"https://kurs.com.ua/bank/88-oshchadbank/");
+            request = WebRequest.Create(URL);
             var response = request.GetResponse();
 
 
@@ -153,29 +160,14 @@ namespace ExchangeService.Handler
             var reader = new StreamReader(stream);
 
             string data = reader.ReadToEnd();
+            
+            return finilizeCurrencyExchange(data, firstCurrencyCode, secondCurrencyCode,pattern,bank);
+        }
+        public Currency finilizeCurrencyExchange(string data, int firstCurrencyCode, int secondCurrencyCode, string pattern, string bank) {
             Currency cur = new Currency();
-            cur = calculateExchangeRate(data, firstCurrencyCode, secondCurrencyCode, @"<span class='ipsKurs_rate'>(\d{2}.\d{4})</span>");
+            cur = calculateExchangeRate(data, firstCurrencyCode, secondCurrencyCode, pattern);
             cur.bankName = bank;
             return cur;
         }
-
-        public Currency returnPUMBCourses(int firstCurrencyCode, int secondCurrencyCode, string bank)
-        {
-            WebRequest request;
-            request = WebRequest.Create(@"https://about.pumb.ua/ru/info/currency_converter");
-            var response = request.GetResponse();
-
-
-            var stream = response.GetResponseStream();
-            var reader = new StreamReader(stream);
-
-            string data = reader.ReadToEnd();
-            Currency cur = new Currency();
-            cur = calculateExchangeRate(data, firstCurrencyCode, secondCurrencyCode, @"<td>(\d{2}.\d{2})</td>");
-            cur.bankName = bank;
-            return cur;
-        }
-
-
     }
 }

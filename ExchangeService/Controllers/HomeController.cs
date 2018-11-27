@@ -19,7 +19,7 @@ namespace ExchangeService.Controllers
     public class HomeController : Controller
     {
 
-        // GET: Home
+        [HttpGet]
         public ActionResult Index()
         {
             return View();
@@ -32,17 +32,8 @@ namespace ExchangeService.Controllers
             string secondCurrency = Request.Form["second-currency"];
             
             ExchangeRateHandler pbh = new ExchangeRateHandler();
-            Currency cr1 = new Currency();
-            Currency cr2 = new Currency();
-            Currency cr3 = new Currency();
-            cr1 = pbh.returnPrivatBankCourses(int.Parse(firstCurrency), int.Parse(secondCurrency),"ПриватБанк");
-            cr2 = pbh.returnOshadBankCourses(int.Parse(firstCurrency), int.Parse(secondCurrency),"Ощадбанк");
-            cr3 = pbh.returnPUMBCourses(int.Parse(firstCurrency), int.Parse(secondCurrency),"ПУМб");
             var list = new List<Currency>();
-            list.Add(cr1);
-            list.Add(cr2);
-            list.Add(cr3);
-
+            list = pbh.getCalculateExchangeRates(int.Parse(firstCurrency), int.Parse(secondCurrency));
             return View("Results",list);
         }
     }
