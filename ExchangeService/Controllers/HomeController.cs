@@ -21,53 +21,7 @@ namespace ExchangeService.Controllers
 
         // GET: Home
         public ActionResult Index()
-        {   
-
-
-           
-
-            //ОЩАДБАНК
-            //WebRequest request;
-            //request = WebRequest.Create(@"https://kurs.com.ua/bank/88-oshchadbank/");
-            //using (var response = request.GetResponse())
-            //{
-            //    using (var stream = response.GetResponseStream())
-            //    using (var reader = new StreamReader(stream))
-            //    {
-            //        string data = reader.ReadToEnd();
-            //        string pattern = @"<span class='ipsKurs_rate'>(\d{2}.\d{4})</span>";
-            //        Regex regex = new Regex(pattern);
-            //        Match match = regex.Match(data);
-
-            //        while (match.Success)
-            //        {
-            //            var a = match.Groups[1].Value;
-            //            match = match.NextMatch();
-            //        }
-            //    }
-            //}
-
-
-            //УКРСИББАНК
-
-            //WebRequest request;
-            //request = WebRequest.Create(@"https://about.pumb.ua/ru/info/currency_converter");
-            //using (var response = request.GetResponse())
-            //{
-            //    using (var stream = response.GetResponseStream())
-            //    using (var reader = new StreamReader(stream))
-            //    {
-            //        string data = reader.ReadToEnd();
-            //        string pattern = @"<td>(\d{2}.\d{2})</td>";
-            //        Regex regex = new Regex(pattern);
-            //        Match match = regex.Match(data);
-
-            //        while (match.Success)
-            //        {
-            //            var a = match.Groups[1].Value;
-            //            match = match.NextMatch();
-            //        }
-            //    }
+        {
             return View();
         }
 
@@ -76,10 +30,20 @@ namespace ExchangeService.Controllers
         {
             string firstCurrency = Request.Form["first-currency"];
             string secondCurrency = Request.Form["second-currency"];
-            PrivatBankHandler pbh = new PrivatBankHandler();
+            
+            ExchangeRateHandler pbh = new ExchangeRateHandler();
             Currency cr1 = new Currency();
-            cr1 = pbh.returnCourses(int.Parse(firstCurrency), int.Parse(secondCurrency));
-           return PartialView("Result",cr1);
+            Currency cr2 = new Currency();
+            Currency cr3 = new Currency();
+            cr1 = pbh.returnPrivatBankCourses(int.Parse(firstCurrency), int.Parse(secondCurrency),"ПриватБанк");
+            cr2 = pbh.returnOshadBankCourses(int.Parse(firstCurrency), int.Parse(secondCurrency),"Ощадбанк");
+            cr3 = pbh.returnPUMBCourses(int.Parse(firstCurrency), int.Parse(secondCurrency),"ПУМб");
+            var list = new List<Currency>();
+            list.Add(cr1);
+            list.Add(cr2);
+            list.Add(cr3);
+
+            return View("Results",list);
         }
     }
     

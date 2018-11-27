@@ -1,21 +1,22 @@
-﻿@model ExchangeService.Handler.Currency
+﻿@model IList<ExchangeService.Handler.Currency>
 
 
-@if (Model.buying.Length > 0)
-{
-<table class="table">
-    <thead>
-        <tr>
-            <th scope="col">Покупка</th>
-            <th scope="col">Продаж</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td scope="row">@Model.buying</td>
-            <td scope="row">@Model.selling</td>
-        </tr>
-    </tbody>
-</table>
-}
+    @foreach (var a in Model)
+    {<h2>@a.bankName</h2>
+        <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Покупка</th>
+                <th scope="col">Продаж</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td scope="row">@a.buying</td>
+                <td scope="row">@a.selling</td>
+            </tr>
+        </tbody>
+    </table>
+    }
+    
 
