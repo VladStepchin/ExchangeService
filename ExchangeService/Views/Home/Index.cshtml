@@ -1,0 +1,33 @@
+﻿
+@model ExchangeService.Handler.Currency
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Оберіть потрібну валюту:</h2>
+
+@using (Html.BeginForm("Index", "Home", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="input-group custom-input">
+        <select class="custom-select" id="inputGroupSelect04" name="first-currency" aria-label="Example select with button addon">
+            <option selected>Валюта...</option>
+            <option value="0">UAH</option>
+            <option value="1">USD</option>
+            <option value="2">EUR</option>
+        </select>
+    </div>
+
+    <div class="input-group custom-input mb-3">
+        <select class="custom-select" id="inputGroupSelect04" name="second-currency" aria-label="Example select with button addon">
+            <option selected>Валюта...</option>
+            <option value="0">UAH</option>
+            <option value="1">USD</option>
+            <option value="2">EUR</option>
+        </select>
+    </div>
+    <button class="btn btn-primary btn-lg calculate" type="submit">Курс валюти в банках Житомира</button>
+}
+
+
